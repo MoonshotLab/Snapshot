@@ -30,20 +30,21 @@ function capture(){
 
 function gatherCameras(){
   var deferred = Q.defer();
-
+  
+  console.log('gathering cameras...');
   exec('imagesnap -l', function(error, stdout, stderr) {
     if(stdout){
       var cameras = [];
       var outputArray = stdout.split('\n');
 
       outputArray.forEach(function(item, i){
-        if(item.indexOf('USB') != -1){
+        if(item.indexOf('HD Pro') != -1){
           cameras.push(item);
         }
       });
 
       deferred.resolve({ cameras : cameras });
-    } else if(err) deferred.reject(err);
+    } else if(error) deferred.reject(error);
     else deferred.reject(stderr);
   });
 
@@ -55,23 +56,27 @@ function gatherCameras(){
 function takePictures(opts){
   var deferred = Q.defer();
   var pictures = [];
-
+  
+  console.log('taking pictures...');
   opts.cameras.forEach(function(camera, i){
     var timestamp = new Date().getTime();
     var filename  = ['camera', i, timestamp].join('-');
     var filepath  = 'camera-output/' + filename + '.jpg';
-    var command   = ['imagesnap -d', camera, filepath].join(' ');
-
+    var command   = ['imagesnap -d', '"' + camera + '"', filepath].join(' ');
+	
+	setTimeout(function(){
     exec(command, function(error, stdout, stderr) {
       if(stderr) deferred.reject(stderr);
-      if(error) deferred.reject(err);
+      if(error) deferred.reject(error);
       else {
+		console.log('snap!');
         pictures.push(filepath);
         if(pictures.length == opts.cameras.length){
           deferred.resolve({ pictures : pictures });
         }
       }
     });
+    }, 2000*i);
   });
 
   return deferred.promise;
@@ -83,13 +88,14 @@ function uploadPhotos(opts){
   var deferred = Q.defer();
   var savedPics = [];
 
+  console.log('uploading to S3...');
   opts.pictures.forEach(function(pic){
     var s3Path = pic.replace('camera-output', '');
     s3Client.putFile(pic, s3Path, function(err, res){
       if(err) deferred.reject(err);
       else{
         savedPics.push(s3Path);
-        if(savedPics.length == savedPics.length){
+        if(savedPics.length == opts.pictures.length){
           deferred.resolve({ picPaths : savedPics });
         }
       }
@@ -102,5 +108,8 @@ function uploadPhotos(opts){
 
 
 function finish(opts){
-  console.log('Saved ' + opts.picPaths.length + ' pictures');
+  var now = new Date();
+  console.log('saved ' + opts.picPaths.length + ' pictures');
+  console.log(now.getHours() + ':' + now.getMinutes());
+  console.log('--------------------------');
 };
