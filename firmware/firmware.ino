@@ -12,7 +12,7 @@ void setup() {
 
 void loop() {
   for(int i=0; i<240; i++){
-    strip.setPixelColor(i, 255, 255, 255);
+    strip.setPixelColor(i, 120, 255, 200);
   }
   strip.show();
 }
