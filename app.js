@@ -30,7 +30,7 @@ function capture(){
 
 function gatherCameras(){
   var deferred = Q.defer();
-  
+
   console.log('gathering cameras...');
   exec('imagesnap -l', function(error, stdout, stderr) {
     if(stdout){
@@ -56,14 +56,14 @@ function gatherCameras(){
 function takePictures(opts){
   var deferred = Q.defer();
   var pictures = [];
-  
+
   console.log('taking pictures...');
   opts.cameras.forEach(function(camera, i){
     var timestamp = new Date().getTime();
     var filename  = ['camera', i, timestamp].join('-');
     var filepath  = 'camera-output/' + filename + '.jpg';
     var command   = ['imagesnap -d', '"' + camera + '"', filepath].join(' ');
-	
+
 	setTimeout(function(){
     exec(command, function(error, stdout, stderr) {
       if(stderr) deferred.reject(stderr);
@@ -91,6 +91,8 @@ function uploadPhotos(opts){
   console.log('uploading to S3...');
   opts.pictures.forEach(function(pic){
     var s3Path = pic.replace('camera-output', '');
+    s3Path = s3Path.substring(0, 9) + '/' + s3Path.substring(10, s3Path.length);
+
     s3Client.putFile(pic, s3Path, function(err, res){
       if(err) deferred.reject(err);
       else{
@@ -110,6 +112,11 @@ function uploadPhotos(opts){
 function finish(opts){
   var now = new Date();
   console.log('saved ' + opts.picPaths.length + ' pictures');
-  console.log(now.getHours() + ':' + now.getMinutes());
+  var minutes = now.getMinutes();
+  var hours = now.getHours();
+
+  if(minutes < 10) minutes = '0' + minutes;
+  if(hours < 10) hours = '0' + hours;
+  console.log(hours + ':' + minutes);
   console.log('--------------------------');
 };
