@@ -1,13 +1,30 @@
 var Q = require('q');
+var config = require('./config')();
 var exec = require('child_process').exec;
 
+var s3Client = require('knox').createClient({
+  key     : config.S3_KEY,
+  secret  : config.S3_SECRET,
+  bucket  : config.S3_BUCKET
+});
 
-gatherCameras()
-  .then(takePictures)
-  .then(uploadPhotos)
-  .fail(function(err){
-    console.log(err);
-  });
+
+
+
+capture();
+setInterval(capture, 60000);
+
+
+
+function capture(){
+  gatherCameras()
+    .then(takePictures)
+    .then(uploadPhotos)
+    .then(finish)
+    .fail(function(err){
+      console.log(err);
+    });
+}
 
 
 
@@ -31,7 +48,7 @@ function gatherCameras(){
   });
 
   return deferred.promise;
-};
+}
 
 
 
@@ -63,7 +80,27 @@ function takePictures(opts){
 
 
 function uploadPhotos(opts){
+  var deferred = Q.defer();
+  var savedPics = [];
+
   opts.pictures.forEach(function(pic){
-    console.log(pic);
+    var s3Path = pic.replace('camera-output', '');
+    s3Client.putFile(pic, s3Path, function(err, res){
+      if(err) deferred.reject(err);
+      else{
+        savedPics.push(s3Path);
+        if(savedPics.length == savedPics.length){
+          deferred.resolve({ picPaths : savedPics });
+        }
+      }
+    });
   });
+
+  return deferred.promise;
 }
+
+
+
+function finish(opts){
+  console.log('Saved ' + opts.picPaths.length + ' pictures');
+};
