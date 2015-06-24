@@ -65,17 +65,17 @@ function takePictures(opts){
     var command   = ['imagesnap -d', '"' + camera + '"', filepath].join(' ');
 
 	setTimeout(function(){
-    exec(command, function(error, stdout, stderr) {
-      if(stderr) deferred.reject(stderr);
-      if(error) deferred.reject(error);
-      else {
-		console.log('snap!');
-        pictures.push(filepath);
-        if(pictures.length == opts.cameras.length){
-          deferred.resolve({ pictures : pictures });
+      exec(command, function(error, stdout, stderr) {
+        if(stderr){ console.log('b'); deferred.reject(stderr); }
+        if(error){ deferred.reject(error); console.log('c');}
+        else {
+		  console.log('snap!');
+          pictures.push(filepath);
+          if(pictures.length == opts.cameras.length){
+            deferred.resolve({ pictures : pictures });
+          }
         }
-      }
-    });
+      });
     }, 2000*i);
   });
 
