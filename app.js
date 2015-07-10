@@ -59,7 +59,8 @@ function takePictures(opts){
 
   console.log('taking pictures...');
   opts.cameras.forEach(function(camera, i){
-    var timestamp = new Date().getTime();
+    var rounder   = 1000 * 60;
+    var timestamp = Math.round(new Date().getTime() / rounder) * rounder;
     var filename  = ['camera', i, timestamp].join('-');
     var filepath  = 'camera-output/' + filename + '.jpg';
     var command   = ['imagesnap -d', '"' + camera + '"', filepath].join(' ');
