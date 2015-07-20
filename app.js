@@ -59,18 +59,17 @@ function takePictures(opts){
 
   console.log('taking pictures...');
   opts.cameras.forEach(function(camera, i){
-    var rounder   = 1000 * 60;
-    var timestamp = Math.round(new Date().getTime() / rounder) * rounder;
-    var filename  = ['camera', i, timestamp].join('-');
+    var dateStamp = formatDate(new Date());
+    var filename  = ['camera', i, dateStamp].join('-');
     var filepath  = 'camera-output/' + filename + '.jpg';
     var command   = ['imagesnap -d', '"' + camera + '"', filepath].join(' ');
 
-	setTimeout(function(){
+    setTimeout(function(){
       exec(command, function(error, stdout, stderr) {
         if(stderr){ console.log('b'); deferred.reject(stderr); }
         if(error){ deferred.reject(error); console.log('c');}
         else {
-		  console.log('snap!');
+          console.log('snap!');
           pictures.push(filepath);
           if(pictures.length == opts.cameras.length){
             deferred.resolve({ pictures : pictures });
@@ -121,3 +120,21 @@ function finish(opts){
   console.log(hours + ':' + minutes);
   console.log('--------------------------');
 };
+
+
+
+// formats a javascript date object to YYYY-MM-DD-MM
+function formatDate(date){
+  var year    = date.getFullYear();
+  var month   = date.getMonth();
+  var day     = date.getDay();
+  var hour    = date.getHours();
+  var minute  = date.getMinutes();
+
+  if(day < 10) day = '0' + day;
+  if(month < 10) month = '0' + month;
+  if(hour < 10) hour = '0' + hour;
+  if(minute < 10) minute = '0' + minute;
+
+  return [year, month, day, hour, minute].join('-');
+}
