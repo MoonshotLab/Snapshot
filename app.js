@@ -126,8 +126,8 @@ function finish(opts){
 // formats a javascript date object to YYYY-MM-DD-MM
 function formatDate(date){
   var year    = date.getFullYear();
-  var month   = date.getMonth();
-  var day     = date.getDay();
+  var month   = date.getMonth() + 1;
+  var day     = date.getDate();
   var hour    = date.getHours();
   var minute  = date.getMinutes();
 
