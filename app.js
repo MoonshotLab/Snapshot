@@ -155,7 +155,7 @@ function resizePictures(opts){
 
         if(err) deferred.reject(err);
         else if(savedPics.length == opts.pictures.length){
-          deferred.resolve({ picPaths : savedPics });
+          deferred.resolve({ pictures : savedPics });
         }
       });
   });
