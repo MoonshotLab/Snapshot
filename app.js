@@ -149,7 +149,7 @@ function resizePictures(opts){
   var savedPics = [];
 
   opts.pictures.forEach(function(pic){
-    gm(pic).resize(740)
+    gm(pic).resize(780)
       .write(pic, function(err){
         savedPics.push(pic);
 
