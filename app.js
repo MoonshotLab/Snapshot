@@ -1,4 +1,5 @@
 var Q = require('q');
+var gm = require('gm');
 var config = require('./config')();
 var exec = require('child_process').exec;
 
@@ -19,6 +20,7 @@ setInterval(capture, 60000);
 function capture(){
   gatherCameras()
     .then(takePictures)
+    .then(resizePictures)
     .then(uploadPhotos)
     .then(finish)
     .fail(function(err){
@@ -137,4 +139,26 @@ function formatDate(date){
   if(minute < 10) minute = '0' + minute;
 
   return [year, month, day, hour, minute].join('-');
+}
+
+
+
+// resize each photo
+function resizePictures(opts){
+  var deferred = Q.defer();
+  var savedPics = [];
+
+  opts.pictures.forEach(function(pic){
+    gm(pic).resize(740)
+      .write(pic, function(err){
+        savedPics.push(pic);
+
+        if(err) deferred.reject(err);
+        else if(savedPics.length == opts.pictures.length){
+          deferred.resolve({ picPaths : savedPics });
+        }
+      });
+  });
+
+  return deferred.promise;
 }
