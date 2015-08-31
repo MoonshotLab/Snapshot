@@ -149,13 +149,13 @@ function resizePictures(opts){
   var savedPics = [];
 
   opts.pictures.forEach(function(pic){
-    gm(pic).resize(740)
+    gm(pic).resize(780)
       .write(pic, function(err){
         savedPics.push(pic);
 
         if(err) deferred.reject(err);
         else if(savedPics.length == opts.pictures.length){
-          deferred.resolve({ picPaths : savedPics });
+          deferred.resolve({ pictures : savedPics });
         }
       });
   });
