@@ -4,4 +4,5 @@ A utility to take snapshots from a series of usb connected webcams and upload th
 
 ## Dependencies
 * graphics magick - `brew install graphicsmagick`
+* image snap - `brew install imagesnap`
 * node modules - `npm install`
